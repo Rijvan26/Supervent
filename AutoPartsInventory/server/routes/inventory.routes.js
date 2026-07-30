@@ -6,6 +6,7 @@ const {
   updatePart,
   deletePart,
   getLowStockParts,
+  sellPart,
   restockPart,
   getStats,
   getByLocation
@@ -27,6 +28,7 @@ router.route('/:id')
   .put(validateInventory, updatePart)
   .delete(deletePart);
 
+router.patch('/:id/sell', sellPart);
 router.patch('/:id/restock', restockPart);
 
 module.exports = router;

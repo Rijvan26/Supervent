@@ -114,6 +114,32 @@ exports.getLowStockParts = async (req, res, next) => {
   }
 };
 
+exports.sellPart = async (req, res, next) => {
+  try {
+    const saleQuantity = Number(req.body.quantity);
+
+    if (!Number.isFinite(saleQuantity) || saleQuantity <= 0) {
+      return res.status(400).json({ success: false, message: 'Please provide a valid quantity' });
+    }
+
+    const part = await Inventory.findById(req.params.id);
+    if (!part) {
+      return res.status(404).json({ success: false, message: 'Part not found' });
+    }
+
+    if (saleQuantity > part.quantity) {
+      return res.status(400).json({ success: false, message: 'Cannot sell more than current stock' });
+    }
+
+    part.quantity -= saleQuantity;
+    await part.save();
+
+    res.status(200).json({ success: true, data: part });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.restockPart = async (req, res, next) => {
   try {
     if (!req.body.addQuantity || req.body.addQuantity <= 0) {

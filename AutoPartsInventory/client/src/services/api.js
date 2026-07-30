@@ -18,6 +18,7 @@ export const inventoryApi = {
   getStats: () => api.get('/inventory/stats'),
   getLowStock: () => api.get('/inventory/low-stock'),
   getLocations: () => api.get('/inventory/locations'),
+  sell: (id, quantity) => api.patch(`/inventory/${id}/sell`, { quantity }),
   restock: (id, addQuantity) => api.patch(`/inventory/${id}/restock`, { addQuantity }),
   restore: (id, addQuantity) => api.patch(`/inventory/${id}/restock`, { addQuantity }),
 };

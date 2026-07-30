@@ -204,7 +204,8 @@ export const InventoryProvider = ({ children }) => {
         return false;
       }
 
-      const updatedPart = normalizePart({ ...currentPart, quantity: (currentPart.quantity || 0) - saleQuantity });
+      const res = await inventoryApi.sell(id, saleQuantity);
+      const updatedPart = normalizePart(res.data?.data ?? res.data ?? {});
       updatePartsState((prev) => prev.map((part) => (part._id === id ? updatedPart : part)));
 
       const nextHistory = [{ id: Date.now(), partId: id, partName: currentPart.name, quantity: saleQuantity, soldAt: new Date().toISOString() }, ...saleHistory].slice(0, 20);

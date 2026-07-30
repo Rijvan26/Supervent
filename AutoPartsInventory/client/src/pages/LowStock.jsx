@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { inventoryApi } from '../services/api';
 import { useInventory } from '../context/InventoryContext';
 import StockBadge from '../components/inventory/StockBadge';
 import RestoreModal from '../components/inventory/RestoreModal';
 import Modal from '../components/ui/Modal';
 import Loader from '../components/ui/Loader';
 import EmptyState from '../components/ui/EmptyState';
-import { HiOutlineExclamationTriangle, HiOutlineArrowUpTray, HiOutlineEye, HiOutlinePencil } from 'react-icons/hi2';
+import { HiOutlineExclamationTriangle, HiOutlineArrowUpTray } from 'react-icons/hi2';
 import { getStockStatus } from '../utils/stock';
 
 const LowStock = () => {
@@ -15,28 +14,32 @@ const LowStock = () => {
   const [selectedPart, setSelectedPart] = useState(null);
   const [isRestoreOpen, setIsRestoreOpen] = useState(false);
 
-  const { fetchStats, fetchParts } = useInventory();
-
-  const fetchLowStock = async () => {
-    setLoading(true);
-    try {
-      const res = await inventoryApi.getLowStock();
-      const fetched = res.data?.data ?? res.data;
-      setLowStockParts(Array.isArray(fetched) ? fetched : []);
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { fetchStats, fetchParts, parts } = useInventory();
 
   useEffect(() => {
-    fetchLowStock();
+    const loadInventory = async () => {
+      setLoading(true);
+      try {
+        await fetchParts();
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadInventory();
   }, []);
+
+  useEffect(() => {
+    const filtered = parts.filter((part) => {
+      const status = getStockStatus(part.quantity, part.minStockLevel).status;
+      return status === 'Low Stock' || status === 'Out of Stock';
+    });
+
+    setLowStockParts(filtered);
+  }, [parts]);
 
   const handleRestoreClose = () => {
     setIsRestoreOpen(false);
-    fetchLowStock();
     fetchStats();
     fetchParts();
   };
